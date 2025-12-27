@@ -104,6 +104,12 @@ private:
             }
         });
 
+        boot_button_.OnDoubleClick([this]() {
+            power_save_timer_->WakeUp();
+            auto& app = Application::GetInstance();
+            app.ReplayLastTTS();
+        });
+
         volume_up_button_.OnClick([this]() {
             power_save_timer_->WakeUp();
             auto codec = GetAudioCodec();

@@ -493,6 +493,15 @@ void Application::InitializeProtocol() {
     
     protocol_->OnIncomingAudio([this](std::unique_ptr<AudioStreamPacket> packet) {
         if (GetDeviceState() == kDeviceStateSpeaking) {
+            if (is_tts_active_) {
+                // Buffer the packet for replay
+                auto buffered_packet = std::make_unique<AudioStreamPacket>();
+                buffered_packet->sample_rate = packet->sample_rate;
+                buffered_packet->frame_duration = packet->frame_duration;
+                buffered_packet->timestamp = packet->timestamp;
+                buffered_packet->payload = packet->payload;
+                last_tts_packets_.push_back(std::move(buffered_packet));
+            }
             audio_service_.PushPacketToDecodeQueue(std::move(packet));
         }
     });
@@ -522,10 +531,13 @@ void Application::InitializeProtocol() {
             if (strcmp(state->valuestring, "start") == 0) {
                 Schedule([this]() {
                     aborted_ = false;
+                    is_tts_active_ = true;
+                    last_tts_packets_.clear();
                     SetDeviceState(kDeviceStateSpeaking);
                 });
             } else if (strcmp(state->valuestring, "stop") == 0) {
                 Schedule([this]() {
+                    is_tts_active_ = false;
                     if (GetDeviceState() == kDeviceStateSpeaking) {
                         if (listening_mode_ == kListeningModeManualStop) {
                             SetDeviceState(kDeviceStateIdle);
@@ -1040,6 +1052,14 @@ void Application::SetAecMode(AecMode mode) {
 
 void Application::PlaySound(const std::string_view& sound) {
     audio_service_.PlaySound(sound);
+}
+
+void Application::ReplayLastTTS() {
+    Schedule([this]() {
+        for (auto& packet : last_tts_packets_) {
+            audio_service_.PushPacketToDecodeQueue(std::make_unique<AudioStreamPacket>(*packet), false);
+        }
+    });
 }
 
 void Application::ResetProtocol() {
