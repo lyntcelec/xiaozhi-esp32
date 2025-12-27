@@ -450,6 +450,9 @@ choice BOARD_TYPE
     config BOARD_TYPE_HU_087
         bool "HU-087"
         depends on IDF_TARGET_ESP32S3
+    config BOARD_TYPE_XIAOZHI_SAM
+        bool "Xiaozhi Sam"
+        depends on IDF_TARGET_ESP32S3
 endchoice
 
 choice

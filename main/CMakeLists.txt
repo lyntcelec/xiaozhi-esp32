@@ -572,6 +572,11 @@ elseif(CONFIG_BOARD_TYPE_HU_087)
     set(BOARD_TYPE "hu-087")
     set(BUILTIN_TEXT_FONT font_puhui_basic_14_1)
     set(BUILTIN_ICON_FONT font_awesome_14_1)
+elseif(CONFIG_BOARD_TYPE_XIAOZHI_SAM)
+    set(BOARD_TYPE "xiaozhi-sam")
+    set(BUILTIN_TEXT_FONT font_puhui_basic_14_1)
+    set(BUILTIN_ICON_FONT font_awesome_14_1)
+    set(DEFAULT_EMOJI_COLLECTION twemoji_32)
 endif()
 
 file(GLOB BOARD_SOURCES
