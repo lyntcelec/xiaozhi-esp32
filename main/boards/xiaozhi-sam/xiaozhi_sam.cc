@@ -227,6 +227,10 @@ public:
         // WifiBoard::SetPowerSaveMode(enabled); // This method doesn't exist
     }
 
+    virtual void WakeUp() override {
+        power_save_timer_->WakeUp();
+    }
+
     virtual std::string GetWifiApSsidPrefix() const {
         return "Sammie";
     }

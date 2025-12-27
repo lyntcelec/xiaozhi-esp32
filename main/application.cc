@@ -502,7 +502,7 @@ void Application::InitializeProtocol() {
                 buffered_packet->payload = packet->payload;
                 last_tts_packets_.push_back(std::move(buffered_packet));
             }
-            audio_service_.PushPacketToDecodeQueue(std::move(packet));
+            audio_service_.PushPacketToDecodeQueue(std::move(packet), true);  // Wait for space to prevent dropping packets
         }
     });
     
@@ -767,6 +767,9 @@ void Application::HandleWakeWordDetectedEvent() {
     if (!protocol_) {
         return;
     }
+
+    auto& board = Board::GetInstance();
+    board.WakeUp();
 
     auto state = GetDeviceState();
     
@@ -1057,7 +1060,7 @@ void Application::PlaySound(const std::string_view& sound) {
 void Application::ReplayLastTTS() {
     Schedule([this]() {
         for (auto& packet : last_tts_packets_) {
-            audio_service_.PushPacketToDecodeQueue(std::make_unique<AudioStreamPacket>(*packet), false);
+            audio_service_.PushPacketToDecodeQueue(std::make_unique<AudioStreamPacket>(*packet), true);
         }
     });
 }
